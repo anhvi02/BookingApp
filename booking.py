@@ -10,17 +10,6 @@ db_path = 'data/bookings.db'
 conn = sqlite3.connect(db_path)
 cur = conn.cursor()
 
-# Create the table (if not already created)
-# cur.execute('''
-#     CREATE TABLE IF NOT EXISTS bookings (
-#         name TEXT NOT NULL,
-#         numberofpeople INTEGER NOT NULL, 
-#         phone TEXT NOT NULL,
-#         time TEXT NOT NULL,
-#         service TEXT NOT NULL
-#     )
-# ''')
-
 # Insert booking into the database
 def insert_booking(name, numberofpeople, phone, time, service):
     cur.execute("INSERT INTO bookings (name, numberofpeople, phone, time, service) VALUES (?, ?, ?, ?, ?)",
@@ -32,35 +21,27 @@ def check_time_availability(new_time):
     cur.execute("SELECT time FROM bookings")
     existing_times = cur.fetchall()
     
-    # Convert the new time into a datetime object
     try:
-        new_time_obj = datetime.datetime.strptime(new_time, "%Y-%m-%d %H:%M")  # User input time format
+        new_time_obj = datetime.datetime.strptime(new_time, "%Y-%m-%d %H:%M")
     except ValueError:
-        # In case user input includes seconds, handle that
         new_time_obj = datetime.datetime.strptime(new_time, "%Y-%m-%d %H:%M:%S")
 
     for existing_time in existing_times:
         existing_time = existing_time[0]
-        # Try parsing the existing time with both formats (with and without seconds)
         try:
-            existing_time_obj = datetime.datetime.strptime(existing_time, "%Y-%m-%d %H:%M")  # For time without seconds
+            existing_time_obj = datetime.datetime.strptime(existing_time, "%Y-%m-%d %H:%M")
         except ValueError:
-            # If that fails, try the format with seconds
-            existing_time_obj = datetime.datetime.strptime(existing_time, "%Y-%m-%d %H:%M:%S")  # Format in the database
-
-        # Calculate the difference between the existing time and the new time
+            existing_time_obj = datetime.datetime.strptime(existing_time, "%Y-%m-%d %H:%M:%S")
+        
         time_difference = abs(existing_time_obj - new_time_obj)
         
-        # If the time difference is less than 1 hour, return False
         if time_difference < datetime.timedelta(hours=1):
             return False
     return True
 
-
-
 # Streamlit UI
 def display_bookings():
-    st.title("BETTY SPA")
+    st.title("Betty Spa")
     st.subheader("Hệ thống đặt lịch")
     
     # Client name input
@@ -69,17 +50,26 @@ def display_bookings():
     # Phone number input
     phone = st.text_input("Số điện thoại")
     
-    # Number of people with session state handling
-    people = st.number_input("Số người", min_value=1, max_value=10, value=1)
+    # Create columns for date, time, number of people, and service
+    col1, col2 = st.columns(2)
     
-    # Date picker
-    date = st.date_input("Chọn ngày", min_value=datetime.date.today())
+    with col1:
+        # Date picker
+        date = st.date_input("Chọn ngày", min_value=datetime.date.today())
     
-    # Time picker
-    time = st.time_input("Chọn giờ", datetime.time(9, 0))
-
-    # Service selection (optional)
-    service = st.selectbox("Dịch vụ", ["Facial", "Massage", "Manicure", "Pedicure"])
+    with col2:
+        # Time picker
+        time = st.time_input("Chọn giờ", datetime.time(9, 0))
+    
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        # Number of people input
+        people = st.number_input("Số người", min_value=1, max_value=10, value=1)
+    
+    with col4:
+        # Service selection (optional)
+        service = st.selectbox("Dịch vụ", ["Gội đầu", "Lấy mụn", "Lăn kim", "Ủ mặt"])
 
     # Combine date and time into a single string for storing in the database
     datetime_str = f"{date} {time}"
