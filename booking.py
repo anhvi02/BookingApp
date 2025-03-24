@@ -3,6 +3,8 @@ import streamlit as st
 import datetime
 import pandas as pd
 
+st.set_page_config(layout = 'centered', page_title='Betty Spa Booking', page_icon='🧖‍♀️')
+
 # Path to SQLite database
 db_path = 'data/bookings.db'
 
@@ -43,6 +45,7 @@ def check_time_availability(new_time):
 def display_bookings():
     st.title("Betty Spa")
     st.subheader("Hệ thống đặt lịch")
+    st.text("Làm bởi Vĩ đẹp trai trong 1 tiếng nên chưa xài được, thông cảm")
     
     # Client name input
     client_name = st.text_input("Nhập tên của bạn")
